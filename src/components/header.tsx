@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { UserNav } from '@/components/dashboard/user-nav';
 import { useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
@@ -13,9 +14,10 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetDescription,
 } from './ui/sheet';
 import { Button } from './ui/button';
-import { Home, Menu, Package2, Handshake, Users, Settings, Package, UserCircle, Truck, FileText, FileBarChart, Target, AlertTriangle, TrendingUp, BookText, Cpu, Clock, Timer, BedDouble, ShieldCheck, Megaphone, Gavel } from 'lucide-react';
+import { Home, Menu, Package2, Handshake, Users, Settings, Package, Bell, UserCircle, Truck, FileText, FileBarChart, Target, AlertTriangle, TrendingUp, BookText, Cpu, Clock, Timer, BedDouble, ShieldCheck, Megaphone, Gavel } from 'lucide-react';
 import { Logo } from './logo';
 import { PartnerSwitcher } from './dashboard/partner-switcher';
 import Link from 'next/link';
@@ -24,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { YearFilter } from './dashboard/year-filter';
+import { ScrollArea } from './ui/scroll-area';
 
 
 const navLinks = [
@@ -52,6 +55,7 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
   const handleLogout = async () => {
     try {
@@ -80,7 +84,7 @@ export function Header() {
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
-        <Sheet>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
                 <Button
                 variant="outline"
@@ -91,32 +95,33 @@ export function Header() {
                 <span className="sr-only">Ouvrir le menu de navigation</span>
                 </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
-                <SheetHeader>
-                    <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
-                </SheetHeader>
-                <nav className="grid gap-2 text-lg font-medium">
-                <Link
-                    href="#"
-                    className="flex items-center gap-2 text-lg font-semibold mb-4"
-                >
+            <SheetContent side="left" className="flex flex-col p-0">
+                <SheetHeader className="border-b p-4">
+                  <Link href="#" className="flex items-center gap-2 font-semibold" onClick={() => setIsSheetOpen(false)}>
                     <Logo variant="sidebar" />
-                </Link>
-                {navLinks.map(({ href, label, icon: Icon, exact }) => (
-                    <Link
-                    key={label}
-                    href={href}
-                    className={cn(
-                        'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                        isLinkActive(href, exact) && 'bg-muted text-foreground'
-                    )}
-                    >
-                    <Icon className="h-5 w-5" />
-                    {label}
-                    </Link>
-                ))}
-                </nav>
-                <div className="mt-auto">
+                  </Link>
+                  <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
+                  <SheetDescription className="sr-only">Accédez aux différentes sections du tableau de bord.</SheetDescription>
+                </SheetHeader>
+                <ScrollArea className="flex-1">
+                  <nav className="grid items-start gap-2 p-4 text-lg font-medium">
+                  {navLinks.map(({ href, label, icon: Icon, exact }) => (
+                      <Link
+                        key={label}
+                        href={href}
+                        onClick={() => setIsSheetOpen(false)}
+                        className={cn(
+                            'flex items-center gap-4 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground',
+                            isLinkActive(href, exact) && 'bg-muted text-foreground'
+                        )}
+                      >
+                      <Icon className="h-5 w-5" />
+                      {label}
+                      </Link>
+                  ))}
+                  </nav>
+                </ScrollArea>
+                <div className="mt-auto p-4 border-t">
                 </div>
             </SheetContent>
         </Sheet>
