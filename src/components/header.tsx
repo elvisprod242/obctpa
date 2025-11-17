@@ -10,6 +10,8 @@ import { ThemeToggle } from './dashboard/theme-toggle';
 import {
   Sheet,
   SheetContent,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from './ui/sheet';
 import { Button } from './ui/button';
@@ -90,6 +92,9 @@ export function Header() {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
+                <SheetHeader>
+                    <SheetTitle className="sr-only">Menu de navigation</SheetTitle>
+                </SheetHeader>
                 <nav className="grid gap-2 text-lg font-medium">
                 <Link
                     href="#"
