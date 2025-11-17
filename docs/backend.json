@@ -1,0 +1,985 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user account in the AuthZenith application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "registrationDate": {
+          "type": "string",
+          "description": "The date and time the user registered.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "registrationDate"
+      ]
+    },
+    "Partenaire": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Partenaire",
+      "type": "object",
+      "description": "Represents a partner.",
+      "properties": {
+        "nom": {
+          "type": "string",
+          "description": "Name of the partner."
+        },
+        "actif": {
+          "type": "boolean",
+          "description": "Whether the partner is active."
+        }
+      },
+      "required": [
+        "nom",
+        "actif"
+      ]
+    },
+    "Conducteur": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Conducteur",
+      "type": "object",
+      "description": "Represents a driver.",
+      "properties": {
+        "nom": {
+          "type": "string",
+          "description": "Last name of the driver."
+        },
+        "prenom": {
+          "type": "string",
+          "description": "First name of the driver."
+        },
+        "numero_permis": {
+          "type": "string",
+          "description": "Driver's license number."
+        },
+        "categorie_permis": {
+          "type": "string",
+          "description": "Driver's license category."
+        },
+        "cle_obc": {
+          "type": "string",
+          "description": "OBC key."
+        },
+        "lieu_travail": {
+          "type": "string",
+          "description": "Work location."
+        }
+      },
+      "required": [
+        "nom",
+        "prenom",
+        "numero_permis",
+        "categorie_permis",
+        "cle_obc",
+        "lieu_travail"
+      ]
+    },
+    "Vehicule": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vehicule",
+      "type": "object",
+      "description": "Represents a vehicle.",
+      "properties": {
+        "nom": {
+          "type": "string",
+          "description": "Name of the vehicle."
+        },
+        "immatriculation": {
+          "type": "string",
+          "description": "Vehicle registration number."
+        },
+        "conducteur_id": {
+          "type": "string",
+          "description": "ID of the assigned driver from the 'conducteurs' collection."
+        }
+      },
+      "required": [
+        "nom",
+        "immatriculation"
+      ]
+    },
+    "Invariant": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Invariant",
+      "type": "object",
+      "description": "Represents an invariant.",
+      "properties": {
+        "titre": {
+          "type": "string",
+          "description": "Title of the invariant."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the invariant."
+        }
+      },
+      "required": [
+        "titre",
+        "description"
+      ]
+    },
+    "Rapport": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Rapport",
+      "type": "object",
+      "description": "Represents a report.",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "jour": {
+          "type": "string"
+        },
+        "partenaire_id": {
+          "type": "string"
+        },
+        "conducteur_id": {
+          "type": "string"
+        },
+        "invariant_id": {
+          "type": "string"
+        },
+        "heure_debut_trajet": {
+          "type": "string",
+          "format": "time"
+        },
+        "heure_fin_trajet": {
+          "type": "string",
+          "format": "time"
+        },
+        "temps_conduite": {
+          "type": "string"
+        },
+        "temps_attente": {
+          "type": "string"
+        },
+        "duree": {
+          "type": "string"
+        },
+        "duree_ralenti": {
+          "type": "string"
+        },
+        "distance_km": {
+          "type": "string"
+        },
+        "vitesse_moy_kmh": {
+          "type": "string"
+        },
+        "vitesse_max_kmh": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "jour",
+        "partenaire_id",
+        "heure_debut_trajet",
+        "heure_fin_trajet",
+        "temps_conduite",
+        "temps_attente",
+        "duree",
+        "duree_ralenti",
+        "distance_km",
+        "vitesse_moy_kmh",
+        "vitesse_max_kmh"
+      ]
+    },
+    "Objectif": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Objectif",
+      "type": "object",
+      "description": "Represents an objective.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner."
+        },
+        "invariant_id": {
+          "type": "string",
+          "description": "ID of the related invariant."
+        },
+        "chapitre": {
+          "type": "string",
+          "description": "Chapter of the objective."
+        },
+        "user_id": {
+          "type": "string",
+          "description": "ID of the user who created the objective."
+        },
+        "cible": {
+          "type": "number",
+          "description": "Target value of the objective."
+        },
+        "unite": {
+          "type": "string",
+          "description": "Unit of the target value."
+        },
+        "mode": {
+          "type": "string",
+          "description": "Mode of the objective (e.g., Préventif)."
+        },
+        "frequence": {
+          "type": "string",
+          "description": "Frequency of the objective (e.g., Mensuel)."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "invariant_id",
+        "chapitre",
+        "user_id",
+        "cible",
+        "unite",
+        "mode",
+        "frequence"
+      ]
+    },
+    "Infraction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Infraction",
+      "type": "object",
+      "description": "Represents an infraction.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "rapports_id": {
+          "type": "string"
+        },
+        "conducteur_id": {
+          "type": "string"
+        },
+        "invariant_id": {
+          "type": "string"
+        },
+        "type_infraction": {
+          "type": "string"
+        },
+        "nombre": {
+          "type": "number"
+        },
+        "mesure_disciplinaire": {
+          "type": "string"
+        },
+        "autres_mesures_disciplinaire": {
+          "type": "string"
+        },
+        "suivi": {
+          "type": "boolean"
+        },
+        "amelioration": {
+          "type": "boolean"
+        },
+        "date_suivi": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "date",
+        "type_infraction"
+      ]
+    },
+    "InfractionFile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InfractionFile",
+      "type": "object",
+      "description": "Represents a file attached to an infraction.",
+      "properties": {
+        "infraction_id": {
+          "type": "string",
+          "description": "ID of the related infraction from the 'infractions' collection."
+        },
+        "file": {
+          "type": "string",
+          "description": "URL or path to the stored file."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the file."
+        }
+      },
+      "required": [
+        "infraction_id",
+        "file",
+        "description"
+      ]
+    },
+    "Kpi": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Kpi",
+      "type": "object",
+      "description": "Represents a Key Performance Indicator (KPI).",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner from the 'partenaires' collection."
+        },
+        "rapports_id": {
+          "type": "string",
+          "description": "ID of the related report from the 'rapports' collection."
+        },
+        "objectifs_id": {
+          "type": "string",
+          "description": "ID of the related objective from the 'objectifs' collection."
+        },
+        "resultat": {
+          "type": "string",
+          "description": "Result of the KPI."
+        },
+        "analyse_cause": {
+          "type": "string",
+          "description": "Analysis of the cause."
+        },
+        "action_prise": {
+          "type": "string",
+          "description": "Action taken."
+        },
+        "commentaire": {
+          "type": "string",
+          "description": "A general comment for monthly analysis."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "objectifs_id"
+      ]
+    },
+    "Procedure": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Procedure",
+      "type": "object",
+      "description": "Represents a procedure file related to a partner.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner from the 'partenaires' collection."
+        },
+        "file": {
+          "type": "string",
+          "description": "URL or path to the stored procedure file."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "file"
+      ]
+    },
+    "Equipement": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Equipement",
+      "type": "object",
+      "description": "Represents equipment for a vehicle.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of equipment installation or check."
+        },
+        "vehicule_id": {
+          "type": "string",
+          "description": "ID of the related vehicle."
+        },
+        "balise": {
+          "type": "boolean",
+          "description": "Whether the vehicle has a GPS tracker (balise)."
+        },
+        "camera": {
+          "type": "boolean",
+          "description": "Whether the vehicle has a camera."
+        },
+        "detecteur_de_fatigue": {
+          "type": "boolean",
+          "description": "Whether the vehicle has a fatigue detector."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "date",
+        "vehicule_id",
+        "balise",
+        "camera",
+        "detecteur_de_fatigue"
+      ]
+    },
+    "TempsTravail": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TempsTravail",
+      "type": "object",
+      "description": "Represents a work time analysis entry.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner from the 'partenaires' collection."
+        },
+        "rapports_id": {
+          "type": "string",
+          "description": "ID of the related report from the 'rapports' collection."
+        },
+        "analyse_cause": {
+          "type": "string",
+          "description": "Analysis of the cause."
+        },
+        "action_prise": {
+          "type": "string",
+          "description": "Action taken."
+        },
+        "suivi": {
+          "type": "string",
+          "description": "Follow-up status."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "rapports_id",
+        "analyse_cause",
+        "action_prise",
+        "suivi"
+      ]
+    },
+    "TempsConduite": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TempsConduite",
+      "type": "object",
+      "description": "Represents a driving time analysis entry.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner from the 'partenaires' collection."
+        },
+        "rapports_id": {
+          "type": "string",
+          "description": "ID of the related report from the 'rapports' collection."
+        },
+        "objectifs_id": {
+          "type": "string",
+          "description": "ID of the related objective from the 'objectifs' collection."
+        },
+        "analyse_cause": {
+          "type": "string",
+          "description": "Analysis of the cause."
+        },
+        "action_prise": {
+          "type": "string",
+          "description": "Action taken."
+        },
+        "suivi": {
+          "type": "string",
+          "description": "Follow-up status."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "rapports_id",
+        "objectifs_id",
+        "analyse_cause",
+        "action_prise",
+        "suivi"
+      ]
+    },
+    "TempsRepos": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TempsRepos",
+      "type": "object",
+      "description": "Represents a resting time analysis entry.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner from the 'partenaires' collection."
+        },
+        "rapports_id": {
+          "type": "string",
+          "description": "ID of the related report from the 'rapports' collection."
+        },
+        "objectifs_id": {
+          "type": "string",
+          "description": "ID of the related objective from the 'objectifs' collection."
+        },
+        "analyse_cause": {
+          "type": "string",
+          "description": "Analysis of the cause."
+        },
+        "action_prise": {
+          "type": "string",
+          "description": "Action taken."
+        },
+        "suivi": {
+          "type": "string",
+          "description": "Follow-up status."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "rapports_id",
+        "objectifs_id",
+        "analyse_cause",
+        "action_prise",
+        "suivi"
+      ]
+    },
+    "ControleCabine": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ControleCabine",
+      "type": "object",
+      "description": "Represents a cabin check file related to a partner.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner from the 'partenaires' collection."
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "file": {
+          "type": "string",
+          "description": "URL or path to the stored cabin check file."
+        },
+        "commentaire": {
+          "type": "string",
+          "description": "A comment on the cabin check."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "date",
+        "file",
+        "commentaire"
+      ]
+    },
+    "PlanningCommunication": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PlanningCommunication",
+      "type": "object",
+      "description": "Represents a communication plan entry.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner."
+        },
+        "periode": {
+          "type": "string",
+          "description": "The period of the communication (e.g., 'Janvier 2024')."
+        },
+        "theme": {
+          "type": "string",
+          "description": "The theme of the communication."
+        },
+        "animateur": {
+          "type": "string",
+          "description": "The person leading the communication."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "periode",
+        "theme",
+        "animateur"
+      ]
+    },
+    "Communication": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Communication",
+      "type": "object",
+      "description": "Represents a communication action.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner."
+        },
+        "planning_communication_id": {
+          "type": "string",
+          "description": "ID of the related communication plan."
+        },
+        "video": {
+          "type": "string",
+          "description": "URL or path to the video file."
+        },
+        "canal": {
+          "type": "string",
+          "description": "The channel used for the communication (e.g., Teams)."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "planning_communication_id",
+        "video",
+        "canal"
+      ]
+    },
+    "Scp": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Scp",
+      "type": "object",
+      "description": "Represents a sanction for an infraction.",
+      "properties": {
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner."
+        },
+        "invariants_id": {
+          "type": "string",
+          "description": "ID of the related invariant."
+        },
+        "sanction": {
+          "type": "string",
+          "description": "The sanction applied."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of infraction (e.g., Alerte)."
+        },
+        "value": {
+          "type": "number",
+          "description": "The value or count of the infraction."
+        }
+      },
+      "required": [
+        "partenaire_id",
+        "invariants_id",
+        "sanction",
+        "type",
+        "value"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information.  Path-based ownership ensures only the authenticated user can access their own data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, obtained from Firebase Authentication."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/partenaires/{partenaireId}",
+        "definition": {
+          "entityName": "Partenaire",
+          "schema": {
+            "$ref": "#/backend/entities/Partenaire"
+          },
+          "description": "Stores partner information.",
+          "params": [
+            {
+              "name": "partenaireId",
+              "description": "The unique identifier for the partner."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/conducteurs/{conducteurId}",
+        "definition": {
+          "entityName": "Conducteur",
+          "schema": {
+            "$ref": "#/backend/entities/Conducteur"
+          },
+          "description": "Stores driver information.",
+          "params": [
+            {
+              "name": "conducteurId",
+              "description": "The unique identifier for the driver."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/vehicules/{vehiculeId}",
+        "definition": {
+          "entityName": "Vehicule",
+          "schema": {
+            "$ref": "#/backend/entities/Vehicule"
+          },
+          "description": "Stores vehicle information.",
+          "params": [
+            {
+              "name": "vehiculeId",
+              "description": "The unique identifier for the vehicle."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/invariants/{invariantId}",
+        "definition": {
+          "entityName": "Invariant",
+          "schema": {
+            "$ref": "#/backend/entities/Invariant"
+          },
+          "description": "Stores invariant information.",
+          "params": [
+            {
+              "name": "invariantId",
+              "description": "The unique identifier for the invariant."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/rapports/{rapportId}",
+        "definition": {
+          "entityName": "Rapport",
+          "schema": {
+            "$ref": "#/backend/entities/Rapport"
+          },
+          "description": "Stores report information.",
+          "params": [
+            {
+              "name": "rapportId",
+              "description": "The unique identifier for the report."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/objectifs/{objectifId}",
+        "definition": {
+          "entityName": "Objectif",
+          "schema": {
+            "$ref": "#/backend/entities/Objectif"
+          },
+          "description": "Stores objective information.",
+          "params": [
+            {
+              "name": "objectifId",
+              "description": "The unique identifier for the objective."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/infractions/{infractionId}",
+        "definition": {
+          "entityName": "Infraction",
+          "schema": {
+            "$ref": "#/backend/entities/Infraction"
+          },
+          "description": "Stores infraction information.",
+          "params": [
+            {
+              "name": "infractionId",
+              "description": "The unique identifier for the infraction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/infractionFiles/{fileId}",
+        "definition": {
+          "entityName": "InfractionFile",
+          "schema": {
+            "$ref": "#/backend/entities/InfractionFile"
+          },
+          "description": "Stores files related to infractions.",
+          "params": [
+            {
+              "name": "fileId",
+              "description": "The unique identifier for the file."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/kpis/{kpiId}",
+        "definition": {
+          "entityName": "Kpi",
+          "schema": {
+            "$ref": "#/backend/entities/Kpi"
+          },
+          "description": "Stores Key Performance Indicator (KPI) data.",
+          "params": [
+            {
+              "name": "kpiId",
+              "description": "The unique identifier for the KPI."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/procedures/{procedureId}",
+        "definition": {
+          "entityName": "Procedure",
+          "schema": {
+            "$ref": "#/backend/entities/Procedure"
+          },
+          "description": "Stores procedure files.",
+          "params": [
+            {
+              "name": "procedureId",
+              "description": "The unique identifier for the procedure."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/equipements/{equipementId}",
+        "definition": {
+          "entityName": "Equipement",
+          "schema": {
+            "$ref": "#/backend/entities/Equipement"
+          },
+          "description": "Stores vehicle equipment data.",
+          "params": [
+            {
+              "name": "equipementId",
+              "description": "The unique identifier for the equipment record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/temps_travail/{tempsTravailId}",
+        "definition": {
+          "entityName": "TempsTravail",
+          "schema": {
+            "$ref": "#/backend/entities/TempsTravail"
+          },
+          "description": "Stores work time analysis data.",
+          "params": [
+            {
+              "name": "tempsTravailId",
+              "description": "The unique identifier for the work time record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/temps_conduite/{tempsConduiteId}",
+        "definition": {
+          "entityName": "TempsConduite",
+          "schema": {
+            "$ref": "#/backend/entities/TempsConduite"
+          },
+          "description": "Stores driving time analysis data.",
+          "params": [
+            {
+              "name": "tempsConduiteId",
+              "description": "The unique identifier for the driving time record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/temps_repos/{tempsReposId}",
+        "definition": {
+          "entityName": "TempsRepos",
+          "schema": {
+            "$ref": "#/backend/entities/TempsRepos"
+          },
+          "description": "Stores resting time analysis data.",
+          "params": [
+            {
+              "name": "tempsReposId",
+              "description": "The unique identifier for the resting time record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/controle_cabine/{controleCabineId}",
+        "definition": {
+          "entityName": "ControleCabine",
+          "schema": {
+            "$ref": "#/backend/entities/ControleCabine"
+          },
+          "description": "Stores cabin check files.",
+          "params": [
+            {
+              "name": "controleCabineId",
+              "description": "The unique identifier for the cabin check."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/planning_communications/{planningCommunicationId}",
+        "definition": {
+          "entityName": "PlanningCommunication",
+          "schema": {
+            "$ref": "#/backend/entities/PlanningCommunication"
+          },
+          "description": "Stores communication planning entries.",
+          "params": [
+            {
+              "name": "planningCommunicationId",
+              "description": "The unique identifier for the communication plan entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/communications/{communicationId}",
+        "definition": {
+          "entityName": "Communication",
+          "schema": {
+            "$ref": "#/backend/entities/Communication"
+          },
+          "description": "Stores communication actions.",
+          "params": [
+            {
+              "name": "communicationId",
+              "description": "The unique identifier for the communication action."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/scp/{scpId}",
+        "definition": {
+          "entityName": "Scp",
+          "schema": {
+            "$ref": "#/backend/entities/Scp"
+          },
+          "description": "Stores sanction and procedure data.",
+          "params": [
+            {
+              "name": "scpId",
+              "description": "The unique identifier for the SCP record."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure secure and scalable authentication and user data management for the AuthZenith application, adhering to Authorization Independence and QAPs. \n\nWe implement path-based ownership for user data under `/users/{userId}`, ensuring that each user's data is isolated and accessible only by them. This structure supports secure `list` operations as the rules can easily verify ownership based on the path without needing to inspect any document data (QAPs). Authentication is handled via Firebase Auth, and the user's `uid` is used as the primary means of identification and authorization.\n\nThe 'partenaires', 'conducteurs', 'vehicules', 'invariants', 'rapports', 'objectifs', 'infractions', 'infractionFiles', and 'kpis' collections are accessible by any authenticated user.\n\nSince the application is focused on email/password registration and login with a dashboard, no collaborative features or roles beyond individual user ownership are specified, simplifying the data model and security rules. No denormalization is required in this case, since no other party besides the user requires access to the data."
+  }
+}
+    
