@@ -54,6 +54,7 @@ import {
   List,
   Search,
   UserCircle,
+  Eye,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -292,6 +293,18 @@ function ConducteurActions({ conducteur }: { conducteur: Conducteur }) {
         <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
           <Tooltip>
             <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" asChild>
+                    <Link href={`/dashboard/conducteurs/${conducteur.id}`}>
+                        <Eye className="h-4 w-4" />
+                    </Link>
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Détails</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
@@ -326,28 +339,26 @@ function ConducteurActions({ conducteur }: { conducteur: Conducteur }) {
 
 function ConducteurCard({ conducteur }: { conducteur: Conducteur }) {
   return (
-    <Link href={`/dashboard/conducteurs/${conducteur.id}`} className="block">
-        <Card className="rounded-xl flex flex-col h-full hover:bg-muted/50 transition-colors">
-            <CardHeader>
-                <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                    <UserCircle className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <div className="flex-1 space-y-1">
-                    <CardTitle className="text-2xl font-bold truncate">{conducteur.prenom} {conducteur.nom}</CardTitle>
-                </div>
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground flex-grow">
-                <p><strong>Permis:</strong> {conducteur.numero_permis} ({conducteur.categorie_permis})</p>
-                <p><strong>Clé OBC:</strong> {conducteur.cle_obc}</p>
-                <p><strong>Lieu:</strong> {conducteur.lieu_travail}</p>
-            </CardContent>
-            <CardFooter className="p-4 pt-0">
-                <ConducteurActions conducteur={conducteur} />
-            </CardFooter>
-        </Card>
-    </Link>
+    <Card className="rounded-xl flex flex-col h-full hover:bg-muted/50 transition-colors">
+        <CardHeader>
+            <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
+                <UserCircle className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div className="flex-1 space-y-1">
+                <CardTitle className="text-2xl font-bold truncate">{conducteur.prenom} {conducteur.nom}</CardTitle>
+            </div>
+            </div>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground flex-grow">
+            <p><strong>Permis:</strong> {conducteur.numero_permis} ({conducteur.categorie_permis})</p>
+            <p><strong>Clé OBC:</strong> {conducteur.cle_obc}</p>
+            <p><strong>Lieu:</strong> {conducteur.lieu_travail}</p>
+        </CardContent>
+        <CardFooter className="p-4 pt-0">
+            <ConducteurActions conducteur={conducteur} />
+        </CardFooter>
+    </Card>
   );
 }
 
