@@ -342,12 +342,12 @@ function ConducteurCard({ conducteur }: { conducteur: Conducteur }) {
     <Card className="rounded-xl flex flex-col h-full hover:bg-muted/50 transition-colors">
         <CardHeader>
             <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                <UserCircle className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <div className="flex-1 space-y-1">
-                <CardTitle className="text-2xl font-bold truncate">{conducteur.prenom} {conducteur.nom}</CardTitle>
-            </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted flex-shrink-0">
+                    <UserCircle className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div className="flex-1 space-y-1 min-w-0">
+                    <CardTitle className="text-2xl font-bold truncate">{conducteur.prenom} {conducteur.nom}</CardTitle>
+                </div>
             </div>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground flex-grow">
@@ -510,17 +510,23 @@ export default function ConducteursPage() {
             </TableHeader>
             <TableBody>
               {currentConducteurs?.map((conducteur) => (
-                <TableRow key={conducteur.id} onClick={() => router.push(`/dashboard/conducteurs/${conducteur.id}`)} className="cursor-pointer">
+                <TableRow key={conducteur.id} className="cursor-pointer">
                     <TableCell>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                        <UserCircle className="h-5 w-5 text-muted-foreground" />
-                        </div>
+                        <Link href={`/dashboard/conducteurs/${conducteur.id}`}>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted hover:bg-muted/80">
+                                <UserCircle className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                        </Link>
                     </TableCell>
-                    <TableCell className="font-medium">{conducteur.prenom} {conducteur.nom}</TableCell>
+                    <TableCell className="font-medium">
+                        <Link href={`/dashboard/conducteurs/${conducteur.id}`} className="hover:underline">
+                            {conducteur.prenom} {conducteur.nom}
+                        </Link>
+                    </TableCell>
                     <TableCell>{conducteur.numero_permis}</TableCell>
                     <TableCell>{conducteur.cle_obc}</TableCell>
                     <TableCell>{conducteur.lieu_travail}</TableCell>
-                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                    <TableCell className="text-right">
                         <ConducteurActions
                         conducteur={conducteur}
                         />
