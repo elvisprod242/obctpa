@@ -51,7 +51,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, query, where } from 'firebase/firestore';
 import {
   Loader2,
   PlusCircle,
@@ -63,7 +63,7 @@ import {
   Truck,
   UserCircle,
 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import {
@@ -87,18 +87,22 @@ const vehiculeSchema = z.object({
   nom: z.string().min(1, { message: 'Le nom est requis.' }),
   immatriculation: z.string().min(1, { message: "L'immatriculation est requise." }),
   conducteur_id: z.string().optional(),
+  partenaire_id: z.string(),
 });
 
 type VehiculeFormValues = z.infer<typeof vehiculeSchema>;
 type Vehicule = VehiculeFormValues & { id: string };
 type Conducteur = { id: string, nom: string, prenom: string };
+type Partenaire = { id: string, nom: string, actif: boolean };
 
 function VehiculeForm({
   vehicule,
   onFinished,
+  activePartnerId,
 }: {
   vehicule?: Vehicule;
   onFinished: () => void;
+  activePartnerId: string;
 }) {
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -113,14 +117,25 @@ function VehiculeForm({
       nom: '',
       immatriculation: '',
       conducteur_id: '',
+      partenaire_id: activePartnerId,
     },
   });
+
+  useEffect(() => {
+    form.reset(vehicule || {
+        nom: '',
+        immatriculation: '',
+        conducteur_id: '',
+        partenaire_id: activePartnerId,
+      });
+  }, [vehicule, activePartnerId, form])
 
   const onSubmit = async (data: VehiculeFormValues) => {
     setIsLoading(true);
     const dataToSave = {
       ...data,
       conducteur_id: data.conducteur_id === 'none' ? '' : data.conducteur_id,
+      partenaire_id: activePartnerId,
     };
     try {
       if (vehicule) {
@@ -209,7 +224,7 @@ function VehiculeForm({
   );
 }
 
-function VehiculeActions({ vehicule }: { vehicule: Vehicule }) {
+function VehiculeActions({ vehicule, activePartnerId }: { vehicule: Vehicule; activePartnerId: string }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const firestore = useFirestore();
@@ -235,6 +250,7 @@ function VehiculeActions({ vehicule }: { vehicule: Vehicule }) {
           <VehiculeForm
             vehicule={vehicule}
             onFinished={() => setIsEditDialogOpen(false)}
+            activePartnerId={activePartnerId}
           />
         </DialogContent>
       </Dialog>
@@ -299,7 +315,7 @@ function VehiculeActions({ vehicule }: { vehicule: Vehicule }) {
   );
 }
 
-function VehiculeCard({ vehicule, conducteurs }: { vehicule: Vehicule, conducteurs: Conducteur[] | null }) {
+function VehiculeCard({ vehicule, conducteurs, activePartnerId }: { vehicule: Vehicule, conducteurs: Conducteur[] | null; activePartnerId: string; }) {
   const conducteur = conducteurs?.find(c => c.id === vehicule.conducteur_id);
   return (
     <Card className="rounded-xl flex flex-col">
@@ -321,7 +337,7 @@ function VehiculeCard({ vehicule, conducteurs }: { vehicule: Vehicule, conducteu
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <VehiculeActions vehicule={vehicule} />
+        <VehiculeActions vehicule={vehicule} activePartnerId={activePartnerId} />
       </CardFooter>
     </Card>
   );
@@ -335,9 +351,14 @@ export default function VehiculesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
+  const partenairesQuery = useMemoFirebase(() => collection(firestore, 'partenaires'),[firestore]);
+  const { data: partenaires, isLoading: isLoadingPartenaires } = useCollection<Partenaire>(partenairesQuery);
+
+  const activePartner = useMemo(() => partenaires?.find(p => p.actif), [partenaires]);
+
   const vehiculesQuery = useMemoFirebase(
-    () => collection(firestore, 'vehicules'),
-    [firestore]
+    () => activePartner ? query(collection(firestore, 'vehicules'), where('partenaire_id', '==', activePartner.id)) : null,
+    [firestore, activePartner]
   );
   const { data: vehicules, isLoading: isLoadingVehicules } = useCollection<Vehicule>(vehiculesQuery);
 
@@ -358,7 +379,7 @@ export default function VehiculesPage() {
     `${v.conducteurPrenom} ${v.conducteurNom}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
-  const isLoading = isLoadingVehicules || isLoadingConducteurs;
+  const isLoading = isLoadingPartenaires || isLoadingVehicules || isLoadingConducteurs;
 
   const lastItemIndex = currentPage * itemsPerPage;
   const firstItemIndex = lastItemIndex - itemsPerPage;
@@ -378,7 +399,7 @@ export default function VehiculesPage() {
             onOpenChange={setIsCreateDialogOpen}
           >
             <DialogTrigger asChild>
-              <Button>
+              <Button disabled={!activePartner}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Nouveau Véhicule
               </Button>
@@ -390,9 +411,12 @@ export default function VehiculesPage() {
                   Ajoutez un nouveau véhicule à votre flotte.
                 </DialogDescription>
               </DialogHeader>
-              <VehiculeForm
-                onFinished={() => setIsCreateDialogOpen(false)}
-              />
+              {activePartner && (
+                <VehiculeForm
+                    onFinished={() => setIsCreateDialogOpen(false)}
+                    activePartnerId={activePartner.id}
+                />
+              )}
             </DialogContent>
           </Dialog>
         </div>
@@ -448,6 +472,13 @@ export default function VehiculesPage() {
         <div className="flex flex-1 justify-center items-center p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      ) : !activePartner ? (
+        <div className="text-center p-8 border rounded-lg flex-1 flex flex-col justify-center items-center">
+            <h3 className="text-xl font-semibold">Aucun partenaire actif</h3>
+            <p className="text-muted-foreground mt-2 mb-4 max-w-sm">
+                Veuillez activer un partenaire pour gérer les véhicules.
+            </p>
+        </div>
       ) : !filteredVehicules || filteredVehicules.length === 0 ? (
         <div className="text-center p-8 border rounded-lg flex-1 flex flex-col justify-center items-center">
           <h3 className="text-xl font-semibold">Aucun véhicule trouvé</h3>
@@ -456,7 +487,7 @@ export default function VehiculesPage() {
               ? `Aucun véhicule ne correspond à votre recherche "${searchTerm}".`
               : 'Commencez par ajouter votre premier véhicule pour le voir apparaître ici.'}
           </p>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!activePartner}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Nouveau Véhicule
           </Button>
@@ -468,6 +499,7 @@ export default function VehiculesPage() {
               key={vehicule.id}
               vehicule={vehicule}
               conducteurs={conducteurs}
+              activePartnerId={activePartner.id}
             />
           ))}
         </div>
@@ -499,6 +531,7 @@ export default function VehiculesPage() {
                   <TableCell className="text-right">
                     <VehiculeActions
                       vehicule={vehicule}
+                      activePartnerId={activePartner.id}
                     />
                   </TableCell>
                 </TableRow>
@@ -554,3 +587,4 @@ export default function VehiculesPage() {
     </div>
   );
 }
+    
