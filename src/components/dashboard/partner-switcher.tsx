@@ -107,7 +107,7 @@ export function PartnerSwitcher() {
           ) : activePartner ? (
             activePartner.nom
           ) : (
-            'TPA'
+            'Tous les partenaires'
           )}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -120,7 +120,7 @@ export function PartnerSwitcher() {
             disabled={isSwitching}
             className="text-sm"
           >
-            TPA
+            TPA (Global)
             <CheckIcon
               className={cn(
                 'ml-auto h-4 w-4',
