@@ -27,8 +27,8 @@ import { formatDate } from '@/lib/utils';
 import { useYearFilter } from '@/context/year-filter-context';
 
 type Partenaire = { id: string; nom: string; actif: boolean };
-type Conducteur = { id: string; nom: string; prenom: string };
-type Vehicule = { id: string };
+type Conducteur = { id: string; nom: string; prenom: string; partenaire_id: string; };
+type Vehicule = { id: string; partenaire_id: string; };
 type Invariant = { id: string; titre: string };
 type Infraction = {
   id: string;
@@ -260,12 +260,21 @@ function RecentInfractions({
   infractions: (Infraction & { conducteurNom?: string })[] | null;
   conducteurs: Conducteur[] | null;
 }) {
+  const { selectedYear } = useYearFilter();
+
   const enrichedInfractions = useMemo(() => {
     const driverMap = new Map(
       conducteurs?.map((c) => [c.id, `${c.prenom} ${c.nom}`])
     );
     return infractions
-      ?.map((inf) => ({
+      ?.filter((infraction) => {
+        if (selectedYear === 'all') return true;
+        try {
+            const infractionDate = new Date(infraction.date.includes('/') ? infraction.date.split('/').reverse().join('-') : infraction.date);
+            return !isNaN(infractionDate.getTime()) && infractionDate.getFullYear().toString() === selectedYear;
+        } catch { return false; }
+      })
+      .map((inf) => ({
         ...inf,
         conducteurNom: inf.conducteur_id
           ? driverMap.get(inf.conducteur_id)
@@ -281,7 +290,7 @@ function RecentInfractions({
         }
       })
       .slice(0, 5);
-  }, [infractions, conducteurs]);
+  }, [infractions, conducteurs, selectedYear]);
 
   return (
     <div className="space-y-8">
@@ -565,6 +574,18 @@ export default function DashboardPage() {
     }).length || 0;
   }, [infractions]);
 
+  const conducteursCount = useMemo(() => {
+    if (!conducteurs) return 0;
+    if (!activePartner) return conducteurs.length;
+    return conducteurs.filter(c => c.partenaire_id === activePartner.id).length;
+  }, [conducteurs, activePartner]);
+  
+  const vehiculesCount = useMemo(() => {
+    if (!vehicules) return 0;
+    if (!activePartner) return vehicules.length;
+    return vehicules.filter(v => v.partenaire_id === activePartner.id).length;
+  }, [vehicules, activePartner]);
+
   if (!selectedYear) {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-background">
@@ -604,10 +625,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {isLoadingConducteurs ? '...' : conducteurs?.length || 0}
+              {isLoadingConducteurs ? '...' : conducteursCount}
             </div>
             <p className="text-xs text-muted-foreground">
-              Total des conducteurs enregistrés
+              {activePartner ? `Pour ${activePartner.nom}` : 'Total des conducteurs enregistrés'}
             </p>
           </CardContent>
         </Card>
@@ -618,10 +639,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {isLoadingVehicules ? '...' : vehicules?.length || 0}
+              {isLoadingVehicules ? '...' : vehiculesCount}
             </div>
             <p className="text-xs text-muted-foreground">
-              Total des véhicules dans la flotte
+              {activePartner ? `Pour ${activePartner.nom}` : 'Total des véhicules dans la flotte'}
             </p>
           </CardContent>
         </Card>
