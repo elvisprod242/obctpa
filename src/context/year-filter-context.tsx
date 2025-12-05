@@ -50,7 +50,7 @@ export function YearFilterProvider({ children }: { children: ReactNode }) {
 
   const availableYears = useMemo(() => {
     const currentYear = new Date().getFullYear();
-    const startYear = 2023;
+    const startYear = 2023; // You can adjust the start year if needed
     const years = [];
     for (let year = currentYear; year >= startYear; year--) {
       years.push(year.toString());
