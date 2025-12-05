@@ -51,11 +51,6 @@ export function UserNav({ user, onLogout }: UserNavProps) {
               Profil
             </DropdownMenuItem>
           </Link>
-          <Link href="/dashboard/settings">
-            <DropdownMenuItem>
-              Paramètres
-            </DropdownMenuItem>
-          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onLogout}>
