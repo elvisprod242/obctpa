@@ -76,6 +76,10 @@
         "lieu_travail": {
           "type": "string",
           "description": "Work location."
+        },
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner from the 'partenaires' collection."
         }
       },
       "required": [
@@ -84,7 +88,8 @@
         "numero_permis",
         "categorie_permis",
         "cle_obc",
-        "lieu_travail"
+        "lieu_travail",
+        "partenaire_id"
       ]
     },
     "Vehicule": {
@@ -104,11 +109,16 @@
         "conducteur_id": {
           "type": "string",
           "description": "ID of the assigned driver from the 'conducteurs' collection."
+        },
+        "partenaire_id": {
+          "type": "string",
+          "description": "ID of the related partner from the 'partenaires' collection."
         }
       },
       "required": [
         "nom",
-        "immatriculation"
+        "immatriculation",
+        "partenaire_id"
       ]
     },
     "Invariant": {
