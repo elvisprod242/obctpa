@@ -31,7 +31,7 @@ import Link from 'next/link';
 type Partenaire = { id: string; nom: string; actif: boolean };
 type Invariant = { id: string; titre: string };
 type Infraction = { id: string; partenaire_id: string; date: string; conducteur_id?: string; type_infraction: string; invariant_id?: string };
-type Conducteur = { id: string; nom: string; prenom: string };
+type Conducteur = { id: string; nom: string; prenom: string; partenaire_id: string; };
 type Scp = { id: string; partenaire_id: string; invariants_id: string; sanction: string; type: string; value: number };
 
 type InfractionDetail = {
@@ -68,6 +68,12 @@ export default function ScpPage() {
 
   const conducteursQuery = useMemoFirebase(() => collection(firestore, 'conducteurs'), [firestore]);
   const { data: conducteurs, isLoading: isLoadingConducteurs } = useCollection<Conducteur>(conducteursQuery);
+  
+  const filteredConducteurs = useMemo(() => {
+    if (!conducteurs) return [];
+    if (!activePartner) return conducteurs; // Show all if "Tous les partenaires" is active
+    return conducteurs.filter(c => c.partenaire_id === activePartner.id);
+  }, [conducteurs, activePartner]);
 
   const invariantsQuery = useMemoFirebase(() => collection(firestore, 'invariants'), [firestore]);
   const { data: invariants, isLoading: isLoadingInvariants } = useCollection<Invariant>(invariantsQuery);
@@ -224,7 +230,7 @@ export default function ScpPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Sélectionner un conducteur</SelectItem>
-              {conducteurs?.map((driver) => (
+              {filteredConducteurs?.map((driver) => (
                 <SelectItem key={driver.id} value={driver.id}>
                   {driver.prenom} {driver.nom}
                 </SelectItem>
