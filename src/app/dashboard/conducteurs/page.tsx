@@ -56,7 +56,7 @@ import {
   UserCircle,
   Eye,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import {
@@ -77,7 +77,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
 
 const conducteurSchema = z.object({
   nom: z.string().min(1, { message: 'Le nom est requis.' }),
@@ -86,17 +86,23 @@ const conducteurSchema = z.object({
   categorie_permis: z.string().min(1, { message: 'La catégorie est requise.' }),
   cle_obc: z.string().min(1, { message: 'La clé OBC est requise.' }),
   lieu_travail: z.string().min(1, { message: 'Le lieu de travail est requis.' }),
+  partenaire_id: z.string(),
 });
 
 type ConducteurFormValues = z.infer<typeof conducteurSchema>;
-type Conducteur = ConducteurFormValues & { id: string };
+type Conducteur = ConducteurFormValues & { id: string, partenaireNom?: string };
+type Partenaire = { id: string; nom: string; actif: boolean };
 
 function ConducteurForm({
   conducteur,
   onFinished,
+  activePartnerId,
+  partenaires
 }: {
   conducteur?: Conducteur;
   onFinished: () => void;
+  activePartnerId: string | null;
+  partenaires: Partenaire[] | null;
 }) {
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -112,18 +118,25 @@ function ConducteurForm({
       categorie_permis: '',
       cle_obc: '',
       lieu_travail: '',
+      partenaire_id: activePartnerId || ''
     },
   });
 
   const onSubmit = async (data: ConducteurFormValues) => {
     setIsLoading(true);
+    
+    const dataToSave = { ...data };
+    if (!dataToSave.partenaire_id && activePartnerId) {
+      dataToSave.partenaire_id = activePartnerId;
+    }
+
     try {
       if (conducteur) {
         const docRef = doc(conducteursCollection, conducteur.id);
-        updateDocumentNonBlocking(docRef, data);
+        updateDocumentNonBlocking(docRef, dataToSave);
         toast({ title: 'Succès', description: 'Conducteur mis à jour.' });
       } else {
-        addDocumentNonBlocking(conducteursCollection, data);
+        addDocumentNonBlocking(conducteursCollection, dataToSave);
         toast({ title: 'Succès', description: 'Conducteur ajouté.' });
       }
       onFinished();
@@ -170,6 +183,30 @@ function ConducteurForm({
             )}
             />
         </div>
+        <FormField
+            control={form.control}
+            name="partenaire_id"
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Partenaire</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Sélectionner un partenaire" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {partenaires?.map((p) => (
+                                <SelectItem key={p.id} value={p.id}>
+                                    {p.nom}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
         <FormField
           control={form.control}
           name="numero_permis"
@@ -235,7 +272,7 @@ function ConducteurForm({
   );
 }
 
-function ConducteurActions({ conducteur }: { conducteur: Conducteur }) {
+function ConducteurActions({ conducteur, activePartnerId, partenaires }: { conducteur: Conducteur; activePartnerId: string | null, partenaires: Partenaire[] | null; }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const firestore = useFirestore();
@@ -261,6 +298,8 @@ function ConducteurActions({ conducteur }: { conducteur: Conducteur }) {
           <ConducteurForm
             conducteur={conducteur}
             onFinished={() => setIsEditDialogOpen(false)}
+            activePartnerId={activePartnerId}
+            partenaires={partenaires}
           />
         </DialogContent>
       </Dialog>
@@ -290,7 +329,7 @@ function ConducteurActions({ conducteur }: { conducteur: Conducteur }) {
       </AlertDialog>
 
       <TooltipProvider>
-        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-end gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
                 <Button variant="outline" size="icon" asChild>
@@ -337,9 +376,9 @@ function ConducteurActions({ conducteur }: { conducteur: Conducteur }) {
   );
 }
 
-function ConducteurCard({ conducteur }: { conducteur: Conducteur }) {
+function ConducteurCard({ conducteur, activePartnerId, partenaires }: { conducteur: Conducteur; activePartnerId: string | null, partenaires: Partenaire[] | null; }) {
   return (
-    <Card className="rounded-xl flex flex-col h-full hover:bg-muted/50 transition-colors">
+    <Card className="rounded-xl flex flex-col h-full transition-colors">
         <CardHeader>
             <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted flex-shrink-0">
@@ -354,9 +393,10 @@ function ConducteurCard({ conducteur }: { conducteur: Conducteur }) {
             <p><strong>Permis:</strong> {conducteur.numero_permis} ({conducteur.categorie_permis})</p>
             <p><strong>Clé OBC:</strong> {conducteur.cle_obc}</p>
             <p><strong>Lieu:</strong> {conducteur.lieu_travail}</p>
+            <p><strong>Partenaire:</strong> <Badge variant="secondary">{conducteur.partenaireNom || 'Non assigné'}</Badge></p>
         </CardContent>
         <CardFooter className="p-4 pt-0">
-            <ConducteurActions conducteur={conducteur} />
+            <ConducteurActions conducteur={conducteur} activePartnerId={activePartnerId} partenaires={partenaires} />
         </CardFooter>
     </Card>
   );
@@ -364,24 +404,53 @@ function ConducteurCard({ conducteur }: { conducteur: Conducteur }) {
 
 export default function ConducteursPage() {
   const firestore = useFirestore();
-  const router = useRouter();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [partnerFilter, setPartnerFilter] = useState('all');
+
+  const partenairesQuery = useMemoFirebase(() => collection(firestore, 'partenaires'), [firestore]);
+  const { data: partenaires, isLoading: isLoadingPartenaires } = useCollection<Partenaire>(partenairesQuery);
+  const activePartner = useMemo(() => partenaires?.find(p => p.actif), [partenaires]);
 
   const conducteursQuery = useMemoFirebase(
     () => collection(firestore, 'conducteurs'),
     [firestore]
   );
 
-  const { data: conducteurs, isLoading } =
+  const { data: conducteurs, isLoading: isLoadingConducteurs } =
     useCollection<Conducteur>(conducteursQuery);
 
-  const filteredConducteurs = conducteurs?.filter((c) =>
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const isLoading = isLoadingConducteurs || isLoadingPartenaires;
+
+  const enrichedConducteurs = useMemo(() => {
+    const partnerMap = new Map(partenaires?.map(p => [p.id, p.nom]));
+    return conducteurs?.map(c => ({
+      ...c,
+      partenaireNom: partnerMap.get(c.partenaire_id) || 'Non assigné'
+    }))
+  }, [conducteurs, partenaires]);
+
+  const filteredConducteurs = useMemo(() => {
+    let conducteursToFilter = enrichedConducteurs;
+  
+    // Filter by active partner if one is selected
+    if (activePartner) {
+      conducteursToFilter = conducteursToFilter?.filter(c => c.partenaire_id === activePartner.id);
+    } else {
+      // If no active partner (i.e., "Tous les partenaires" is selected), filter by the dropdown if it's not 'all'
+      if (partnerFilter !== 'all') {
+        conducteursToFilter = conducteursToFilter?.filter(c => c.partenaire_id === partnerFilter);
+      }
+    }
+  
+    // Then, filter by the search term
+    return conducteursToFilter?.filter((c) => 
+      `${c.prenom} ${c.nom}`.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [enrichedConducteurs, searchTerm, partnerFilter, activePartner]);
 
   const lastItemIndex = currentPage * itemsPerPage;
   const firstItemIndex = lastItemIndex - itemsPerPage;
@@ -414,7 +483,9 @@ export default function ConducteursPage() {
                 </DialogDescription>
               </DialogHeader>
               <ConducteurForm
-                onFinished={() => setIsCreateDialogOpen(false)}
+                  onFinished={() => setIsCreateDialogOpen(false)}
+                  activePartnerId={activePartner?.id || null}
+                  partenaires={partenaires}
               />
             </DialogContent>
           </Dialog>
@@ -432,6 +503,19 @@ export default function ConducteursPage() {
               className="pl-8 w-full"
             />
           </div>
+          {!activePartner && (
+            <Select value={partnerFilter} onValueChange={setPartnerFilter}>
+              <SelectTrigger className="w-full sm:w-[250px]">
+                <SelectValue placeholder="Filtrer par partenaire" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les partenaires</SelectItem>
+                {partenaires?.map(p => (
+                  <SelectItem key={p.id} value={p.id}>{p.nom}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <div className="flex items-center gap-2">
             <TooltipProvider>
               <Tooltip>
@@ -490,6 +574,8 @@ export default function ConducteursPage() {
             <ConducteurCard
               key={conducteur.id}
               conducteur={conducteur}
+              activePartnerId={activePartner?.id || null}
+              partenaires={partenaires}
             />
           ))}
         </div>
@@ -502,6 +588,7 @@ export default function ConducteursPage() {
                   <UserCircle className="h-4 w-4 inline-block" />
                 </TableHead>
                 <TableHead>Nom</TableHead>
+                <TableHead>Partenaire</TableHead>
                 <TableHead>N° Permis</TableHead>
                 <TableHead>Clé OBC</TableHead>
                 <TableHead>Lieu</TableHead>
@@ -510,25 +597,28 @@ export default function ConducteursPage() {
             </TableHeader>
             <TableBody>
               {currentConducteurs?.map((conducteur) => (
-                <TableRow key={conducteur.id} className="cursor-pointer">
+                <TableRow key={conducteur.id}>
                     <TableCell>
-                        <Link href={`/dashboard/conducteurs/${conducteur.id}`}>
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted hover:bg-muted/80">
-                                <UserCircle className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                        </Link>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted hover:bg-muted/80">
+                            <UserCircle className="h-5 w-5 text-muted-foreground" />
+                        </div>
                     </TableCell>
                     <TableCell className="font-medium">
                         <Link href={`/dashboard/conducteurs/${conducteur.id}`} className="hover:underline">
                             {conducteur.prenom} {conducteur.nom}
                         </Link>
                     </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{conducteur.partenaireNom}</Badge>
+                    </TableCell>
                     <TableCell>{conducteur.numero_permis}</TableCell>
                     <TableCell>{conducteur.cle_obc}</TableCell>
                     <TableCell>{conducteur.lieu_travail}</TableCell>
                     <TableCell className="text-right">
                         <ConducteurActions
-                        conducteur={conducteur}
+                          conducteur={conducteur}
+                          activePartnerId={activePartner?.id || null}
+                          partenaires={partenaires}
                         />
                     </TableCell>
                 </TableRow>
@@ -557,27 +647,29 @@ export default function ConducteursPage() {
                     </SelectContent>
                 </Select>
             </div>
-            <div className="flex items-center space-x-2">
-                <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                >
-                Précédent
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                Page {currentPage} sur {totalPages}
-                </span>
-                <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                >
-                Suivant
-                </Button>
-            </div>
+            { totalPages > 1 &&
+                <div className="flex items-center space-x-2">
+                    <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    >
+                    Précédent
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                    Page {currentPage} sur {totalPages}
+                    </span>
+                    <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    >
+                    Suivant
+                    </Button>
+                </div>
+            }
           </div>
         </Card>
       )}
